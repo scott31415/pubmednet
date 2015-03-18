@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:xlink="http://www.w3.org/1999/xlink">
+  <head>
+    <title>PubNet</title>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <style>
+    .link {
+      //stroke: #ccc;
+      stroke: black;
+    }
+    .node text {
+      pointer-events: none;
+      font: 10px sans-serif;
+    }
+    </style>
+  </head>
+  <body>
+    <h1>{{ term_str }}</h1>
+    <div id="chart"></div>
+<script>
+var width = 1200,
+    height = 1000,
+    fill = d3.scale.category20();
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+var force = d3.layout.force()
+    .gravity(.05)
+    .distance(100)
+    .charge(-100)
+    .size([width, height]);
+d3.json("/static/coauthors.json", function(json) {
+//d3.json("/static/test.json", function(json) {
+  force
+      .nodes(json.nodes)
+      .links(json.links)
+      .start();
+  var link = svg.selectAll(".link")
+      .data(json.links)
+    .enter().append("line")
+      .attr("class", "link");
+  var color = d3.scale.category20();
+  var node = svg.selectAll(".node")
+      .data(json.nodes)
+    .enter().append("g")
+      .attr("class", "node")
+      .call(force.drag);
+
+
+  node.append("a")
+      .attr("xlink:href", function(d){return d.url;})
+      //.attr("xlink:href", "http://google.com")
+  //node.append("circle")
+      .append("circle")
+      //.attr("r", 5)
+      //.attr("r",function(d) {return Math.sqrt(d.size)*2;})  
+      //.attr("r",function(d) {return 1+Math.log(d.size);})  
+      //.style("fill", function(d) { return color(d.id == "me" ? 1 : 2); })
+      .style("fill", function(d) { return color(d.id == "me" ? 1 : 2); });
+
+
+  node.append("text")
+      //.append("text")
+      .attr("dx", 12)
+      .attr("dy", ".35em")
+      .style("font-size", function(d) {return Math.sqrt(d.size)*5;})
+      .text(function(d) { return d.id });
+      
+  //link.attr("stroke-width", function(d) { return d.weight;})
+  link.attr("stroke-opacity", function(d) {return Math.min(d.weight,10)/10.0;});
+  force.on("tick", function() {
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+  });
+});
+</script>
+
+  </body>
+</html>

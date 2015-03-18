@@ -1,0 +1,12 @@
+<html>
+    <head>
+        <title>PubNet</title>
+    </head>
+    <body>
+        <h1>PubNet</h1>
+        <form method="POST">
+            <input name="topic_text" id="topic" placeholder="Enter a search topic" />
+            {% csrf_token %}
+        </form>
+    </body>
+</html>
