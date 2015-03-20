@@ -5,8 +5,7 @@
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <style>
     .link {
-      //stroke: #ccc;
-      stroke: black;
+      stroke: blue;
     }
     .node text {
       pointer-events: none;
@@ -15,6 +14,11 @@
     </style>
   </head>
   <body>
+    <h1>PubNet</h1>
+        <form method="POST">
+            <input name="topic_text" id="topic" placeholder="Enter a search topic" />
+            {% csrf_token %}
+        </form>
     <h1>{{ term_str }}</h1>
     <div id="chart"></div>
 <script>
@@ -26,48 +30,60 @@ var svg = d3.select("body").append("svg")
     .attr("height", height);
 var force = d3.layout.force()
     .gravity(.05)
-    .distance(100)
+    .distance(150)
     .charge(-100)
     .size([width, height]);
+
 d3.json("/static/coauthors.json", function(json) {
-//d3.json("/static/test.json", function(json) {
   force
       .nodes(json.nodes)
       .links(json.links)
       .start();
   var link = svg.selectAll(".link")
       .data(json.links)
-    .enter().append("line")
+      .enter().append("line")
       .attr("class", "link");
   var color = d3.scale.category20();
   var node = svg.selectAll(".node")
       .data(json.nodes)
-    .enter().append("g")
+      .enter().append("g")
       .attr("class", "node")
       .call(force.drag);
 
+  var max_size = 0;
+  var min_size = 999999;
+  for (var i = 0; i < json.nodes.length; i++) {
+      var node_size = json.nodes[i].size;
+      max_size = (node_size > max_size) ? node_size : max_size;
+      min_size = (node_size < min_size) ? node_size : min_size; 
+  } 
+  var opacity_cut = 30;
+  if (max_size/2.0 < opacity_cut) {
+      opacity_cut = max_size/2.0; 
+  }
 
   node.append("a")
       .attr("xlink:href", function(d){return d.url;})
-      //.attr("xlink:href", "http://google.com")
-  //node.append("circle")
       .append("circle")
-      //.attr("r", 5)
-      .attr("r",function(d) {return Math.sqrt(d.size)*2;})  
+     //.attr("r", 5)
+      .attr("r",function(d) {return Math.sqrt(d.size);})  
       //.attr("r",function(d) {return 1+Math.log(d.size);})  
-      //.style("fill", function(d) { return color(d.id == "me" ? 1 : 2); })
-      .style("fill", function(d) { return color(d.id == "me" ? 1 : 2); });
+      .style("fill", "cyan")
+      .style("fill-opacity",1)
+      .style("stroke","blue");
 
 
   node.append("text")
-      //.append("text")
+      .attr("text-anchor","middle") 
       .attr("dx", 12)
       .attr("dy", ".35em")
-      .style("font-size", function(d) {return Math.sqrt(d.size)*5;})
+      .style("font-size", function(d) {return 1+Math.sqrt(d.size)*3;})
+      .style("fill","blue")
+      .style("fill-opacity", function(d) {return Math.min(d.size,opacity_cut)/opacity_cut;})
       .text(function(d) { return d.id });
-      
-  //link.attr("stroke-width", function(d) { return d.weight;})
+
   link.attr("stroke-opacity", function(d) {return Math.min(d.weight,10)/10.0;});
+
   force.on("tick", function() {
     link.attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
