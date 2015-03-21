@@ -1,12 +1,15 @@
 <html>
     <head>
-        <title>PubNet</title>
+        <title>PubmedNet</title>
     </head>
     <body>
-        <h1>PubNet</h1>
+        <h1>PubmedNet</h1>
+        <div>Enter a biomedical research topic and find scientists working on the topic (e.g. computational protein design)</div>
         <form method="POST">
             <input name="topic_text" id="topic" placeholder="Enter a search topic" />
             {% csrf_token %}
         </form>
+        <p>Researchers with significant contributions to the topic will be identified (based on their number of publications and citations received in the field.). The results are displayed as a co-author network.</p>
+        <p>     
     </body>
 </html>

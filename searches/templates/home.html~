@@ -1,11 +1,14 @@
 <html>
     <head>
-        <title>PubNet</title>
+        <title>PubmedNet</title>
     </head>
     <body>
-        <h1>PubNet</h1>
+        <h1>PubmedNet</h1>
+        <div>Please enter a biomedical research topic. Researchers with significant contributions to the topic will be identified (based on their number of publications and citations received in the field.). The results are displayed as a co-author network.</div>
         <form method="POST">
-        <input name="topic_text" id="topic" placeholder="Enter a search topic" />
+            <input name="topic_text" id="topic" placeholder="Enter a search topic" />
+            {% csrf_token %}
         </form>
+        <div></div>  
     </body>
 </html>

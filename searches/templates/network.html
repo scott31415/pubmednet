@@ -72,12 +72,19 @@ d3.json("/static/coauthors.json", function(json) {
       .style("fill-opacity",1)
       .style("stroke","blue");
 
+  var font_scaling = 3;
+  if (max_size < 30) {
+      font_scaling = 5;
+  }
+  else if (max_size >= 30 && max_size < 50) {
+      font_scaling = 4;
+  }
 
   node.append("text")
       .attr("text-anchor","middle") 
       .attr("dx", 12)
       .attr("dy", ".35em")
-      .style("font-size", function(d) {return 1+Math.sqrt(d.size)*3;})
+      .style("font-size", function(d) {return 1+Math.sqrt(d.size)*font_scaling;})
       .style("fill","blue")
       .style("fill-opacity", function(d) {return Math.min(d.size,opacity_cut)/opacity_cut;})
       .text(function(d) { return d.id });
