@@ -18,3 +18,4 @@ def view_networks(request,search_term_str):
     ts = TopicSearch(orig_term_str)
     ts.plot_coauthor_network(json_fname)
     return render(request,'network.html',{'term_str':orig_term_str})
+

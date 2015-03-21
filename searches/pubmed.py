@@ -23,7 +23,7 @@ retmode='xml'
 
 class TopicSearch:
     def __init__(self,term_str):
-        self._terms = []
+        self._terms = term_str.split()
         self._stem_terms = []
         self._id_list = []
         self._top_authors = []
@@ -37,26 +37,31 @@ class TopicSearch:
         self._citation_net = defaultdict(set)
         self._metric = {}
        
+        self._num_max_request = 1000
         self._num_author_limit = 100
-        self._process_query(term_str)
+        self._process_query()
 
-    def _process_query(self,term_str):
-        self._terms = term_str.split()
-        self._id_list = self._get_ids(self._terms)
-
+    def _process_query(self):
+        #self._terms = term_str.split()
+        self.get_ids()
         # if there are too many hits, break into multiple requests (10000 max each time)
-        num_max_request = 1000
-        num_batches = int((len(self._id_list)-1)/num_max_request)+1
+        num_batches = int((len(self._id_list)-1)/self._num_max_request)+1
         for i in range(num_batches):
-            begin_idx = i*num_max_request
-            end_idx = min(len(self._id_list),(i+1)*num_max_request)    
-            summary_doc = self._get_docs(','.join(self._id_list[begin_idx:end_idx]))
-            self._process_doc(summary_doc)    
-        self._process_author_info()
+            self.fetch_records(i)
+        #self._process_author_info()
+
+    def get_num_records(self):
+        return int((len(self._id_list)-1)/self._num_max_request)+1
+
+    def fetch_records(self,i):
+        begin_idx = i*self._num_max_request
+        end_idx = min(len(self._id_list),(i+1)*self._num_max_request)    
+        summary_doc = self._get_docs(','.join(self._id_list[begin_idx:end_idx]))
+        self._process_doc(summary_doc)
 
     # call esearch utility to retrieve list of IDs matching search terms from PubMed
-    def _get_ids(self,terms,num_max=10000):
-        term_str = '+'.join(terms)
+    def get_ids(self,num_max=10000):
+        term_str = '+'.join(self._terms)
         field='abstract'
         retmax=str(num_max)
         sort_method='relevance'
@@ -91,7 +96,7 @@ class TopicSearch:
         #    random.shuffle(uids)
         #:    uids = uids[:num_to_get]
 
-        return uids
+        self._id_list = uids
      
     def _get_docs(self,id_list):
         parms = {
@@ -159,7 +164,7 @@ class TopicSearch:
                 continue
 
             num_total = len(self._first_author[author])+len(self._last_author[author])
-            if num_total < 5 and ((num_total+0.0)/self._num4author[author] < 0.5):
+            if num_total < 10 and ((num_total+0.0)/self._num4author[author] < 0.5):
                 del self._num4author[author]
                 del self._pmid4author[author]
                 continue  
@@ -181,6 +186,7 @@ class TopicSearch:
         self._metric = self._impact4author 
 
     def plot_coauthor_network(self,fname):
+        self._process_author_info() 
         nxg = nx.Graph()
         for author in self._top_authors:
             url = self.get_author_url(author,self._terms)
@@ -200,7 +206,7 @@ class TopicSearch:
     def get_author_url(self,author,terms):
         fields = author.split(' ')
         if len(fields) == 3 and len(fields[0]) == 1 and len(fields[1]) == 1:
-            author_fullname = fields[0]+fields[1]+'%20'+fields[2]
+            author_fullname = fields[2]+'%20+'+fields[0]+fields[1]
         else: 
             author_fullname = '%20'.join(fields)
         #firstname = '%20'.join(fields[1].split())    
@@ -209,7 +215,10 @@ class TopicSearch:
         term_str = '%20'.join(terms)
         ncbi_link='http://www.ncbi.nlm.nih.gov/pubmed?term=('
         ncbi_link+=author_fullname
-        ncbi_link+='%5BAuthor%20-%20Full%5D)%20AND%20'
+        if len(fields) == 3 and len(fields[0]) == 1 and len(fields[1]) == 1:
+            ncbi_link+='%5BAuthor%5D)%20AND%20'
+        else:
+            ncbi_link+='%5BAuthor%20-%20Full%5D)%20AND%20'
         ncbi_link+=term_str
         return ncbi_link
 

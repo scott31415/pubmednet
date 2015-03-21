@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:xlink="http://www.w3.org/1999/xlink">
   <head>
-    <title>PubNet</title>
+    <title>PubmedNet</title>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <style>
     .link {
@@ -14,12 +14,13 @@
     </style>
   </head>
   <body>
-    <h1>PubNet</h1>
+    <h1>PubmedNet</h1>
+        <div>Enter a biomedical research topic and find scientists working in the field (e.g. protein aggregation)</div>
         <form method="POST">
             <input name="topic_text" id="topic" placeholder="Enter a search topic" />
             {% csrf_token %}
         </form>
-    <h1>{{ term_str }}</h1>
+    <h1>Co-author network for {{ term_str }}</h1>
     <div id="chart"></div>
 <script>
 var width = 1200,
@@ -61,6 +62,9 @@ d3.json("/static/coauthors.json", function(json) {
   if (max_size/2.0 < opacity_cut) {
       opacity_cut = max_size/2.0; 
   }
+  if (min_size*2.0 > opacity_cut) {
+      opacity_cut = min_size*2.0;
+  }
 
   node.append("a")
       .attr("xlink:href", function(d){return d.url;})
@@ -100,6 +104,7 @@ d3.json("/static/coauthors.json", function(json) {
   });
 });
 </script>
-
+<p>Scientists with significant contributions to the topic are identified based on their number of publications and citations received in the field. This information and collaboration relationships are visualized as a network.</p>
+        <p>**Note that this site does not host data and instead makes queries to PubMed (U.S. National Library of Medicine, http://www.ncbi.nlm.nih.gov/pubmed), and process the returned search records. A delay up to a few minutes maybe expected while fetching records from Pubmed, especially for more generic terms. Thank you for your patience.</p>
   </body>
 </html>
