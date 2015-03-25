@@ -16,11 +16,12 @@
   <body>
     <h1>PubmedNet</h1>
         <div>Enter a biomedical research topic and find scientists working in the field (e.g. protein aggregation)</div>
+        <div>Please wait a few minutes for the results.</div> 
         <form method="POST">
             <input name="topic_text" id="topic" placeholder="Enter a search topic" />
             {% csrf_token %}
         </form>
-    <h1>{{ term_str }}</h1>
+    <h1>Co-author network for {{ term_str }}</h1>
     <div id="chart"></div>
 <script>
 var width = 1200,
@@ -76,13 +77,13 @@ d3.json("/static/coauthors.json", function(json) {
       .style("fill-opacity",1)
       .style("stroke","blue");
 
-  var font_scaling = 3;
-  if (max_size < 30) {
-      font_scaling = 5;
-  }
-  else if (max_size >= 30 && max_size < 50) {
-      font_scaling = 4;
-  }
+  var font_scaling = Math.max(6-max_size/50,2);
+  //if (max_size < 30) {
+  //    font_scaling = 5;
+  //}
+  //else if (max_size >= 30 && max_size < 50) {
+  //    font_scaling = 4;
+  //}
 
   node.append("text")
       .attr("text-anchor","middle") 

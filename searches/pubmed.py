@@ -133,6 +133,13 @@ class TopicSearch:
 
             self._first_author[authors[0]].add(pmid)
             self._last_author[authors[-1]].add(pmid) 
+
+            top_authors = set()
+            for i in range(min(3,len(authors))):
+                top_authors.add(authors[i])
+            for i in range(min(3,len(authors))):
+                top_authors.add(authors[-i-1]) 
+            authors = list(top_authors)
  
             for citation in article.iterfind('MedlineCitation/CommentsCorrectionsList/CommentsCorrections'):
                 cite_pmid = citation.findtext('PMID')
@@ -164,10 +171,11 @@ class TopicSearch:
                 continue
 
             num_total = len(self._first_author[author])+len(self._last_author[author])
-            if num_total < 10 and ((num_total+0.0)/self._num4author[author] < 0.5):
-                del self._num4author[author]
-                del self._pmid4author[author]
-                continue  
+            #if num_total < 10 and ((num_total+0.0)/self._num4author[author] < 0.5):
+            #if num_total < 5 and ((num_total+0.0)/self._num4author[author] < 0.5):
+            #    del self._num4author[author]
+            #    del self._pmid4author[author]
+            #    continue  
 
             for pmid in self._pmid4author[author]:
                 if pmid in self._citation_net:
@@ -201,6 +209,9 @@ class TopicSearch:
                     nxg.add_edge(author1,author2,weight=self._coauthors[author1][author2])
         nld = json_graph.node_link_data(nxg)
         json.dump(nld,open(fname,'w')) 
+
+    def get_num_results(self):
+        return len(self._top_authors) 
 
     # get link for author + search term
     def get_author_url(self,author,terms):

@@ -5,11 +5,13 @@
     <body>
         <h1>PubmedNet</h1>
         <div>Enter a biomedical research topic and find scientists working in the field (e.g. protein aggregation)</div>
+        <div>Please wait a few minutes for the results.</div>
         <form method="POST">
             <input name="topic_text" id="topic" placeholder="Enter a search topic" />
             {% csrf_token %}
         </form>
+        <div>{{err_str}}</div>
         <p>Scientists with significant contributions to the topic are identified based on their number of publications and citations received in the field. This information and collaboration relationships are visualized as a network.</p>
-        <p>Note that this site does not host data and instead makes queries to PubMed (U.S. National Library of Medicine, http://www.ncbi.nlm.nih.gov/pubmed), and process the returned search records. A delay up to a few minutes maybe expected while fetching records from Pubmed. Delay should therefore be expected, especially for more generic terms</p>     
+        <p>**Note that this site does not host data and instead makes queries to PubMed (U.S. National Library of Medicine, http://www.ncbi.nlm.nih.gov/pubmed), and process the returned search records. A delay up to a few minutes maybe expected while fetching records from Pubmed, especially for more generic terms. Thank you for your patience.</p>     
     </body>
 </html>
